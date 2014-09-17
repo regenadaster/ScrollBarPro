@@ -35,7 +35,7 @@ public class AScrolledComposite extends Composite {
   // complement in two bar's split;
   private Composite complement;
 
-  private Composite content;
+  private Control content = null;
   private Rectangle contentRect;
   private Rectangle bodyRect;
   private int defautBarVale = 15;
@@ -46,23 +46,42 @@ public class AScrolledComposite extends Composite {
     initVerticalBar();
     initComplement();
   }
-  
-  private void initHorizontalBar(){
-    horizontalBar = new ScrollBar(this, 2);
+
+  private void initHorizontalBar() {
+    horizontalBar = new ScrollBar(this, 1);
     horizontalBar.sethorizontal();
     horizontalBar.addPaintListener(new PaintListener() {
 
       @Override
       public void paintControl(PaintEvent e) {
-        bodyRect = getBounds();
-        horizontalBar.setBounds(0, bodyRect.height - defautBarVale, bodyRect.width - defautBarVale, defautBarVale);
+        setHorizontalBar();
       }
     });
   }
-  
-  private void initVerticalBar(){
-    verticalBar = new ScrollBar(this, 2);
 
+  public boolean isContainContent() {
+    if (content != null || !content.isDisposed()) {
+      return true;
+    }
+    return false;
+  }
+
+  public void setHorizontalBar() {
+    updateBody();
+    if (isContainContent()) {
+      if (bodyRect.width > contentRect.width) {
+        horizontalBar.setVisible(false);
+      } else {
+        horizontalBar.setVisible(true);
+      }
+      horizontalBar.setBounds(0, bodyRect.height - defautBarVale, bodyRect.width - defautBarVale, defautBarVale);
+    } else {
+      horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
+    }
+  }
+
+  private void initVerticalBar() {
+    verticalBar = new ScrollBar(this, 1);
     verticalBar.addSelectionListener(new SelectionListener() {
 
       @Override
@@ -79,14 +98,27 @@ public class AScrolledComposite extends Composite {
 
       @Override
       public void paintControl(PaintEvent e) {
-        bodyRect = getBounds();
-        System.out.println(bodyRect);
-        verticalBar.setBounds(bodyRect.width - defautBarVale, 0, defautBarVale, bodyRect.height - defautBarVale);
+        setVerticalBar();
       }
     });
   }
-  
-  private void initComplement(){
+
+  public void setVerticalBar() {
+    updateBody();
+    if (isContainContent()) {
+      if (bodyRect.height > contentRect.height) {
+        verticalBar.setVisible(false);
+      } else {
+        verticalBar.setVisible(true);
+      }
+      verticalBar.setBounds(bodyRect.width - defautBarVale, 0, defautBarVale, bodyRect.height - defautBarVale);
+    }
+    else{
+      verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
+    }
+  }
+
+  private void initComplement() {
     complement = new Composite(this, SWT.NONE);
     complement.redraw();
     complement.addPaintListener(new PaintListener() {
@@ -97,7 +129,7 @@ public class AScrolledComposite extends Composite {
       }
     });
   }
-  
+
   protected void updateComplement() {
     complement.setBounds(bodyRect.width - defautBarVale, bodyRect.height - defautBarVale, defautBarVale, defautBarVale);
     complement.redraw();
@@ -156,11 +188,6 @@ public class AScrolledComposite extends Composite {
     });
   }
 
-  public void setHorizontalBar() {
-    updateBody();
-    updateContent();
-  }
-
   public void setContent(Composite c) {
     content = c;
     setScrollBar(verticalBar);
@@ -173,6 +200,10 @@ public class AScrolledComposite extends Composite {
 
       }
     });
+  }
+
+  public Control getContent() {
+    return content;
   }
 
   public Point getOrigin() {
@@ -748,12 +779,12 @@ public class AScrolledComposite extends Composite {
       }
       if (change == 1 || change == 0) {
         thumbRect = computeThumbRect();
-        System.out.println("change 1 thumbRect:"+thumbRect);
+        System.out.println("change 1 thumbRect:" + thumbRect);
       }
       if (change == 2) {
         int tmpSelection = computeSelection();
         setSelection(tmpSelection);
-        System.out.println("change 2 thumbRect:"+thumbRect);
+        System.out.println("change 2 thumbRect:" + thumbRect);
       }
     }
 
@@ -765,12 +796,13 @@ public class AScrolledComposite extends Composite {
       double tmp;
       if (isHasArrow) {
         if (isVertical) {
-          tmp = (double) ((double) thumbRect.y - (double) headArrow.height)/ (double) ((double) shaftBody.height - (double) headArrow.height * 2);
+          tmp = (double) ((double) thumbRect.y - (double) headArrow.height)
+              / (double) ((double) shaftBody.height - (double) headArrow.height * 2);
         } else {
-          tmp = (double) ((double) thumbRect.x - (double) headArrow.width)/ (double) ((double) shaftBody.width - (double) headArrow.width * 2);
+          tmp = (double) ((double) thumbRect.x - (double) headArrow.width)
+              / (double) ((double) shaftBody.width - (double) headArrow.width * 2);
         }
-      }
-      else{
+      } else {
         if (isVertical) {
           tmp = (double) thumbRect.y / (double) shaftBody.height;
         } else {
@@ -801,14 +833,14 @@ public class AScrolledComposite extends Composite {
         thumbWidth = scrollBox.width;
         thumbX = scrollBox.x;
         thumbY = Math.ceil(scaleHeight * selection + (double) scrollBox.y);
-        System.out.println("compute:thumbY:"+thumbY);
+        System.out.println("compute:thumbY:" + thumbY);
       } else {
         scaleHeight = (double) scrollBox.width / ((double) maximum - (double) minimum);
         thumbWidth = ((double) thumb) * scaleHeight;
         thumbHeight = scrollBox.height;
         thumbX = Math.ceil(scaleHeight * selection + (double) scrollBox.x);
         thumbY = scrollBox.y;
-        System.out.println("compute:thumbX:"+thumbX);
+        System.out.println("compute:thumbX:" + thumbX);
       }
       return new Rectangle((int) thumbX, (int) thumbY, (int) thumbWidth, (int) thumbHeight);
     }
@@ -871,7 +903,7 @@ public class AScrolledComposite extends Composite {
           tmpMin = 0;
           tmpMax = shaftBody.height;
         }
-        System.out.println("setRect:Max:"+tmpMax+"setRect:min:"+tmpMin);
+        System.out.println("setRect:Max:" + tmpMax + "setRect:min:" + tmpMin);
         if (y + _height > tmpMax) {
           y = tmpMax - _height;
           return;
@@ -893,7 +925,7 @@ public class AScrolledComposite extends Composite {
           tmpMin = 0;
           tmpMax = shaftBody.width;
         }
-        System.out.println("setRect:Max:"+tmpMax+"setRect:min:"+tmpMin);
+        System.out.println("setRect:Max:" + tmpMax + "setRect:min:" + tmpMin);
         if (x + _width > tmpMax) {
           x = tmpMax - _width;
           return;
@@ -1025,6 +1057,10 @@ public class AScrolledComposite extends Composite {
       updateBody(width, height);
       setShaftBodyWidth(width);
       setShaftBodyHeight(height);
+    }
+
+    public void setBounds(Rectangle rect) {
+      setBounds(rect.x, rect.y, rect.width, rect.height);
     }
 
     public void setWidth(int value) {
