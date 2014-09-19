@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.DragDetectEvent;
@@ -40,11 +42,30 @@ public class AScrolledComposite extends Composite {
   private Rectangle bodyRect;
   private int defautBarVale = 15;
 
+  private int minHeight;
+  private int minWidth;
+  private boolean expandHorizontal;
+  private boolean expandVertical;
+  
   public AScrolledComposite(Composite parent, int style) {
     super(parent, style);
+    super.setLayout(new AScrolledCompositeLayout());
     initHorizontalBar();
     initVerticalBar();
     initComplement();
+    parent.addControlListener(new ControlListener() {
+      
+      @Override
+      public void controlResized(ControlEvent e) {
+        updateScrolledComposite();
+      }
+      
+      @Override
+      public void controlMoved(ControlEvent e) {
+       
+        
+      }
+    });
   }
 
   private void initHorizontalBar() {
@@ -58,7 +79,15 @@ public class AScrolledComposite extends Composite {
       }
     });
   }
-
+  
+  public ScrollBar getHBar(){
+    return horizontalBar;
+  }
+  
+  public ScrollBar getVBar(){
+    return verticalBar;
+  }
+  
   public boolean isContainContent() {
     if (content != null || !content.isDisposed()) {
       return true;
@@ -68,16 +97,22 @@ public class AScrolledComposite extends Composite {
 
   public void setHorizontalBar() {
     updateBody();
+    updateContent();
+    System.out.println("setHorizontalBar");
+    int bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
+    int bodyWidthValue = bodyRect.width - 2 * getBorderWidth();
     if (isContainContent()) {
-      if (bodyRect.width > contentRect.width) {
+      if (bodyWidthValue > contentRect.width) {
         horizontalBar.setVisible(false);
+        horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
       } else {
         horizontalBar.setVisible(true);
+        horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue - defautBarVale, defautBarVale);
       }
-      horizontalBar.setBounds(0, bodyRect.height - defautBarVale, bodyRect.width - defautBarVale, defautBarVale);
     } else {
       horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
     }
+    System.out.println("horizontalBar:" + horizontalBar.getBounds());
   }
 
   private void initVerticalBar() {
@@ -105,17 +140,26 @@ public class AScrolledComposite extends Composite {
 
   public void setVerticalBar() {
     updateBody();
+    updateContent();
+    System.out.println("setVerticalBar");
+    int bodyHeightValue = bodyRect.height - getBorderWidth() * 2;
+    int bodyWidthValue = bodyRect.width - getBorderWidth() * 2;
+    System.out.println("contentRect.height:"+contentRect.height);
+    System.out.println("containContent is:"+isContainContent());
     if (isContainContent()) {
-      if (bodyRect.height > contentRect.height) {
+      if (bodyHeightValue > contentRect.height) {
         verticalBar.setVisible(false);
+        verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
       } else {
         verticalBar.setVisible(true);
+        verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue - defautBarVale);
       }
-      verticalBar.setBounds(bodyRect.width - defautBarVale, 0, defautBarVale, bodyRect.height - defautBarVale);
     }
     else{
       verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
     }
+    System.out.println("verticalBar:" + verticalBar.getBounds());
+    System.out.println("isVerticalBar: visible?" + verticalBar.getIsVisible());
   }
 
   private void initComplement() {
@@ -130,15 +174,64 @@ public class AScrolledComposite extends Composite {
     });
   }
 
+  public int getMinHeight() {
+    return minHeight;
+  }
+  
+  public int getMinWidth() {
+    return minWidth;
+  }
+  
   protected void updateComplement() {
-    complement.setBounds(bodyRect.width - defautBarVale, bodyRect.height - defautBarVale, defautBarVale, defautBarVale);
+    int bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
+    int bodyWidthValue = bodyRect.width - 2 * getBorderWidth();
+    complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale, defautBarVale);
     complement.redraw();
+  }
+  public void setExpandHorizontal(boolean expand) {
+    checkWidget();
+    if (expand == expandHorizontal) return;
+    expandHorizontal = expand;
+    layout(false);
+  }
+  
+  public void setExpandVertical(boolean expand) {
+    checkWidget();
+    if (expand == expandVertical) return;
+    expandVertical = expand;
+    layout(false);
   }
 
   protected void updateContent() {
     contentRect = content.getBounds();
+    contentRect.height = content.getSize().y;
   }
 
+  public void setMinSize(Point size) {
+    if (size == null) {
+      setMinSize(0, 0);
+    } else {
+      setMinSize(size.x, size.y);
+    }
+  }
+
+  public void setMinWidth(int width) {
+    setMinSize(width, minHeight);
+  }
+
+  public void setMinSize(int width, int height) {
+    checkWidget();
+    if (width == minWidth && height == minHeight) return;
+    minWidth = Math.max(0, width);
+    minHeight = Math.max(0, height);
+    layout(false);
+  }
+  
+  public void setLayout (Layout layout) {
+    checkWidget();
+    return;
+  }
+  
   protected void updateBody() {
     bodyRect = getBounds();
   }
@@ -155,11 +248,11 @@ public class AScrolledComposite extends Composite {
     return (double) sb.getSelection() / (double) (sb.getMaximum() - sb.getMinimum());
   }
 
-  public void setScrollBar(ScrollBar sb) {
+  public void setScrollBarAttribute(ScrollBar sb){
     updateBody();
     updateContent();
     int bodyValue, contentValue;
-    if (sb.getIsVertical()) {
+    if (sb.getIsVertical()) { 
       bodyValue = bodyRect.height - defautBarVale;
       contentValue = contentRect.height;
     } else {
@@ -174,11 +267,16 @@ public class AScrolledComposite extends Composite {
     int tmpThumb = (int) (scales * percent);
     sb.setThumb(tmpThumb);
     sb.setPageIncrement(tmpThumb);
+  }
+  
+  
+  public void setScrollBar(final ScrollBar sb) {
+    setScrollBarAttribute(sb);
     sb.addSelectionListener(new SelectionListener() {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        setContentData();
+        updateScrolledComposite();
       }
 
       @Override
@@ -188,16 +286,39 @@ public class AScrolledComposite extends Composite {
     });
   }
 
+  private void updateScrolledComposite(){
+    updateComplement();
+    setScrollBarAttribute(horizontalBar);
+    setScrollBarAttribute(verticalBar);
+    setContentData();
+    setVerticalBar();
+    setHorizontalBar();
+  }
+  
   public void setContent(Composite c) {
     content = c;
     setScrollBar(verticalBar);
     setScrollBar(horizontalBar);
     content.addPaintListener(new PaintListener() {
-
+      
       @Override
       public void paintControl(PaintEvent e) {
-        updateComplement();
-
+        updateScrolledComposite();
+        System.out.println("content painting");
+      }
+    });
+    content.addControlListener(new ControlListener() {
+      
+      @Override
+      public void controlResized(ControlEvent e) {
+        System.out.println("control Resize!!");
+        updateScrolledComposite();
+        layout(false);
+      }
+      
+      @Override
+      public void controlMoved(ControlEvent e) {
+        
       }
     });
   }
@@ -978,6 +1099,7 @@ public class AScrolledComposite extends Composite {
     public void drawThumb(GC gc) {
       if (thumbImage == null) {
         gc.setForeground(thumbFrameColor);
+        System.out.println("thumbRect:"+thumbRect);
         if (isVertical) {
           gc.drawRoundRectangle(thumbRect.x, thumbRect.y, thumbRect.width - 1, thumbRect.height - 1, 3, 3);
           gc.setBackground(thumbColor);
@@ -1105,6 +1227,10 @@ public class AScrolledComposite extends Composite {
       selection = value;
     }
 
+    public boolean getIsVisible(){
+      return isVisiable;
+    }
+    
     public void setVisible(boolean visible) {
       isVisiable = visible;
     }
@@ -1196,6 +1322,10 @@ public class AScrolledComposite extends Composite {
       thumbImage = new Image(display, thumbImageData);
     }
 
+    public Rectangle getBounds(){
+      return body.getBounds();
+    }
+    
     public Shell getShell() {
       return parent.getShell();
     }
