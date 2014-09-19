@@ -280,9 +280,6 @@ public class AScrolledComposite extends Composite {
       if(needVScroll()) {
         bodyValue -= defautBarVale;
       }
-      else{
-        bodyValue = bodyRect.width;
-      }
       contentValue = contentRect.width;
     }
     tmpMax = bodyValue - 2 * defautBarVale;
