@@ -56,29 +56,20 @@ public class AScrolledComposite extends Composite {
     initHorizontalBar();
     initVerticalBar();
     initComplement();
-    parent.addControlListener(new ControlListener() {
-      
-      @Override
-      public void controlResized(ControlEvent e) {
-        updateScrolledComposite();
-      }
-      
-      @Override
-      public void controlMoved(ControlEvent e) {
-       
-        
-      }
-    });
   }
 
   private void initHorizontalBar() {
     horizontalBar = new ScrollBar(this, 1);
     horizontalBar.sethorizontal();
-    horizontalBar.addPaintListener(new PaintListener() {
-
+    horizontalBar.addSelectionListener(new SelectionListener() {
+      
       @Override
-      public void paintControl(PaintEvent e) {
-        setHorizontalBar();
+      public void widgetSelected(SelectionEvent e) {
+        setContentData(); 
+      }
+      
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
       }
     });
   }
@@ -101,14 +92,14 @@ public class AScrolledComposite extends Composite {
   public boolean needHScroll(){
     updateBody();
     updateContent();
-    if(bodyWidthValue > contentRect.width) return false;
+    if(bodyWidthValue >= contentRect.width) return false;
     return true;
   }
   
   public boolean needVScroll(){
     updateBody();
     updateContent();
-    if(bodyHeightValue > contentRect.height) return false;
+    if(bodyHeightValue >= contentRect.height) return false;
     return true;
   }
   
@@ -135,19 +126,12 @@ public class AScrolledComposite extends Composite {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-
+        setContentData();
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
 
-      }
-    });
-    verticalBar.addPaintListener(new PaintListener() {
-
-      @Override
-      public void paintControl(PaintEvent e) {
-        setVerticalBar();
       }
     });
   }
@@ -177,7 +161,8 @@ public class AScrolledComposite extends Composite {
 
       @Override
       public void paintControl(PaintEvent e) {
-        e.gc.fillRectangle(0, 0, complement.getBounds().width, complement.getBounds().height);
+        System.out.println("needing !!!!!!!!!!!"+(needHScroll() && needVScroll()));
+        if(needHScroll() && needVScroll()) e.gc.fillRectangle(0, 0, complement.getBounds().width, complement.getBounds().height);
       }
     });
   }
@@ -191,7 +176,12 @@ public class AScrolledComposite extends Composite {
   }
   
   protected void updateComplement() {
-    complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale, defautBarVale);
+    if(needHScroll() && needVScroll()) {
+      complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale, defautBarVale);
+    }
+    else{
+      complement.setBounds(0, 0, 0, 0);
+    }
     complement.redraw();
   }
   public void setExpandHorizontal(boolean expand) {
@@ -201,6 +191,13 @@ public class AScrolledComposite extends Composite {
     layout(false);
   }
   
+  public boolean getExpandHorizontal(){
+    return expandHorizontal;
+  }
+  
+  public boolean getExpandVertical(){
+    return expandVertical;
+  }
   public void setExpandVertical(boolean expand) {
     checkWidget();
     if (expand == expandVertical) return;
@@ -211,6 +208,7 @@ public class AScrolledComposite extends Composite {
   protected void updateContent() {
     contentRect = content.getBounds();
     contentRect.height = content.getSize().y;
+    contentRect.width = content.getSize().x;
   }
 
   public void setMinSize(Point size) {
@@ -280,21 +278,9 @@ public class AScrolledComposite extends Composite {
   
   public void setScrollBar(final ScrollBar sb) {
     setScrollBarAttribute(sb);
-    sb.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        updateScrolledComposite();
-      }
-
-      @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
-
-      }
-    });
   }
 
-  private void updateScrolledComposite(){
+  public void updateScrolledComposite(){
     updateComplement();
     setScrollBarAttribute(horizontalBar);
     setScrollBarAttribute(verticalBar);
@@ -307,20 +293,11 @@ public class AScrolledComposite extends Composite {
     content = c;
     setScrollBar(verticalBar);
     setScrollBar(horizontalBar);
-    content.addPaintListener(new PaintListener() {
-      
-      @Override
-      public void paintControl(PaintEvent e) {
-        updateScrolledComposite();
-        System.out.println("content painting");
-      }
-    });
+    layout(false);
     content.addControlListener(new ControlListener() {
       
       @Override
       public void controlResized(ControlEvent e) {
-        System.out.println("control Resize!!");
-        updateScrolledComposite();
         layout(false);
       }
       
@@ -1329,7 +1306,9 @@ public class AScrolledComposite extends Composite {
       thumbImageData = new ImageData(url);
       thumbImage = new Image(display, thumbImageData);
     }
-
+    public Point getSize(){
+      return new Point(width, height);
+    }
     public Rectangle getBounds(){
       return body.getBounds();
     }

@@ -53,7 +53,7 @@ public class scrolledCompositeTest{
     final Composite c2 = new Composite(sc2, SWT.NONE);
     sc2.setContent(c2);
     c2.setBackground(blue);
-    c2.setSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//    c2.setSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     layout = new GridLayout();
     layout.numColumns = 4;
     c2.setLayout(layout);
@@ -63,7 +63,7 @@ public class scrolledCompositeTest{
     System.out.println("c2.computeSize result:"+c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     System.out.println("border width:"+c2.getBorderWidth());
     System.out.println("c2 defaultBounds:"+c2.getBounds());
-    sc2.setMinSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    sc2.setMinSize(200, 200);
 //    sc2.setMinSize(10, 10);
     sc2.addPaintListener(new PaintListener() {
       
