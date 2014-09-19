@@ -53,6 +53,7 @@ public class scrolledCompositeTest{
     final Composite c2 = new Composite(sc2, SWT.NONE);
     sc2.setContent(c2);
     c2.setBackground(blue);
+    c2.setSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     layout = new GridLayout();
     layout.numColumns = 4;
     c2.setLayout(layout);

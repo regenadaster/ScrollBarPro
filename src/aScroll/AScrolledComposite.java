@@ -42,10 +42,13 @@ public class AScrolledComposite extends Composite {
   private Rectangle bodyRect;
   private int defautBarVale = 15;
 
-  private int minHeight;
-  private int minWidth;
+  private int minHeight = 0;
+  private int minWidth = 0;
   private boolean expandHorizontal;
   private boolean expandVertical;
+  
+  private int bodyHeightValue;
+  private int bodyWidthValue;
   
   public AScrolledComposite(Composite parent, int style) {
     super(parent, style);
@@ -95,24 +98,35 @@ public class AScrolledComposite extends Composite {
     return false;
   }
 
-  public void setHorizontalBar() {
+  public boolean needHScroll(){
     updateBody();
     updateContent();
-    System.out.println("setHorizontalBar");
-    int bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
-    int bodyWidthValue = bodyRect.width - 2 * getBorderWidth();
+    if(bodyWidthValue > contentRect.width) return false;
+    return true;
+  }
+  
+  public boolean needVScroll(){
+    updateBody();
+    updateContent();
+    if(bodyHeightValue > contentRect.height) return false;
+    return true;
+  }
+  
+  public void setHorizontalBar() {
     if (isContainContent()) {
-      if (bodyWidthValue > contentRect.width) {
+      if (!needHScroll()) {
         horizontalBar.setVisible(false);
         horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
+        horizontalBar.draw();
       } else {
         horizontalBar.setVisible(true);
         horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue - defautBarVale, defautBarVale);
+        horizontalBar.draw();
       }
     } else {
       horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
+      horizontalBar.draw();
     }
-    System.out.println("horizontalBar:" + horizontalBar.getBounds());
   }
 
   private void initVerticalBar() {
@@ -139,27 +153,21 @@ public class AScrolledComposite extends Composite {
   }
 
   public void setVerticalBar() {
-    updateBody();
-    updateContent();
-    System.out.println("setVerticalBar");
-    int bodyHeightValue = bodyRect.height - getBorderWidth() * 2;
-    int bodyWidthValue = bodyRect.width - getBorderWidth() * 2;
-    System.out.println("contentRect.height:"+contentRect.height);
-    System.out.println("containContent is:"+isContainContent());
     if (isContainContent()) {
-      if (bodyHeightValue > contentRect.height) {
+      if (!needVScroll()) {
         verticalBar.setVisible(false);
         verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
+        verticalBar.draw();
       } else {
         verticalBar.setVisible(true);
         verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue - defautBarVale);
+        verticalBar.draw();
       }
     }
     else{
       verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
+      verticalBar.draw();
     }
-    System.out.println("verticalBar:" + verticalBar.getBounds());
-    System.out.println("isVerticalBar: visible?" + verticalBar.getIsVisible());
   }
 
   private void initComplement() {
@@ -183,8 +191,6 @@ public class AScrolledComposite extends Composite {
   }
   
   protected void updateComplement() {
-    int bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
-    int bodyWidthValue = bodyRect.width - 2 * getBorderWidth();
     complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale, defautBarVale);
     complement.redraw();
   }
@@ -234,6 +240,8 @@ public class AScrolledComposite extends Composite {
   
   protected void updateBody() {
     bodyRect = getBounds();
+    bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
+    bodyWidthValue = bodyRect.width - 2 * getBorderWidth();
   }
 
   public void setContentData() {
