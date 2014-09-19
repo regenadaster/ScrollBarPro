@@ -17,7 +17,7 @@ public class scrolledCompositeTest{
     shell.setLayout(new FillLayout());
       
     // set the size of the scrolled content - method 1
-    final AScrolledComposite sc1 = new AScrolledComposite(shell,  SWT.NONE);
+    final AScrolledComposite sc1 = new AScrolledComposite(shell,  SWT.BORDER);
     final Composite c1 = new Composite(sc1, SWT.NONE);
     sc1.setContent(c1);
     c1.setBackground(red);
@@ -50,7 +50,7 @@ public class scrolledCompositeTest{
     final AScrolledComposite sc2 = new AScrolledComposite(shell,  SWT.BORDER);
     sc2.setExpandHorizontal(true);
     sc2.setExpandVertical(true);
-    final Composite c2 = new Composite(sc2, SWT.NONE);
+    final Composite c2 = new Composite(sc2, SWT.BORDER);
     sc2.setContent(c2);
     c2.setBackground(blue);
 //    c2.setSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));

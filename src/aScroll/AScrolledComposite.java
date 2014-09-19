@@ -107,15 +107,20 @@ public class AScrolledComposite extends Composite {
     if (isContainContent()) {
       if (!needHScroll()) {
         horizontalBar.setVisible(false);
-        horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
+        horizontalBar.setBounds(0, 0, 0, 0);
         horizontalBar.draw();
       } else {
         horizontalBar.setVisible(true);
-        horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue - defautBarVale, defautBarVale);
+        if(needVScroll()){
+          horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue - defautBarVale, defautBarVale);
+        }
+        else{
+          horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue, defautBarVale);
+        }
         horizontalBar.draw();
       }
     } else {
-      horizontalBar.setBounds(new Rectangle(0, 0, 0, 0));
+      horizontalBar.setBounds(0, 0, 0, 0);
       horizontalBar.draw();
     }
   }
@@ -140,16 +145,21 @@ public class AScrolledComposite extends Composite {
     if (isContainContent()) {
       if (!needVScroll()) {
         verticalBar.setVisible(false);
-        verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
+        verticalBar.setBounds(0, 0, 0, 0);
         verticalBar.draw();
       } else {
         verticalBar.setVisible(true);
-        verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue - defautBarVale);
+        if(needHScroll()){
+          verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue - defautBarVale);
+        }
+        else{
+          verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue);
+        }
         verticalBar.draw();
       }
     }
     else{
-      verticalBar.setBounds(new Rectangle(0, 0, 0, 0));
+      verticalBar.setBounds(0, 0, 0, 0);
       verticalBar.draw();
     }
   }
@@ -255,17 +265,27 @@ public class AScrolledComposite extends Composite {
   }
 
   public void setScrollBarAttribute(ScrollBar sb){
+    int tmpMax;
     updateBody();
     updateContent();
     int bodyValue, contentValue;
     if (sb.getIsVertical()) { 
-      bodyValue = bodyRect.height - defautBarVale;
+      bodyValue = bodyRect.height - getBorderWidth() * 2;
+      if(needHScroll()) {
+        bodyValue  -= defautBarVale;
+      }
       contentValue = contentRect.height;
     } else {
-      bodyValue = bodyRect.width - defautBarVale;
+      bodyValue = bodyRect.width - getBorderWidth() * 2;
+      if(needVScroll()) {
+        bodyValue -= defautBarVale;
+      }
+      else{
+        bodyValue = bodyRect.width;
+      }
       contentValue = contentRect.width;
     }
-    int tmpMax = bodyValue - 3 * defautBarVale;
+    tmpMax = bodyValue - 2 * defautBarVale;
     sb.setMaximum(tmpMax);
     sb.setMinimum(0);
     double scales = (double) (sb.getMaximum() - sb.getMinimum());
