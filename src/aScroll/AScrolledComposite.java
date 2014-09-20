@@ -46,10 +46,10 @@ public class AScrolledComposite extends Composite {
   private int minWidth = 0;
   private boolean expandHorizontal;
   private boolean expandVertical;
-  
+
   private int bodyHeightValue;
   private int bodyWidthValue;
-  
+
   public AScrolledComposite(Composite parent, int style) {
     super(parent, style);
     super.setLayout(new AScrolledCompositeLayout());
@@ -62,26 +62,26 @@ public class AScrolledComposite extends Composite {
     horizontalBar = new ScrollBar(this, 1);
     horizontalBar.sethorizontal();
     horizontalBar.addSelectionListener(new SelectionListener() {
-      
+
       @Override
       public void widgetSelected(SelectionEvent e) {
-        setContentData(); 
+        setContentData();
       }
-      
+
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
       }
     });
   }
-  
-  public ScrollBar getHBar(){
+
+  public ScrollBar getHBar() {
     return horizontalBar;
   }
-  
-  public ScrollBar getVBar(){
+
+  public ScrollBar getVBar() {
     return verticalBar;
   }
-  
+
   public boolean isContainContent() {
     if (content != null || !content.isDisposed()) {
       return true;
@@ -89,20 +89,22 @@ public class AScrolledComposite extends Composite {
     return false;
   }
 
-  public boolean needHScroll(){
+  public boolean needHScroll() {
     updateBody();
     updateContent();
-    if(bodyWidthValue >= contentRect.width) return false;
+    if (bodyWidthValue >= contentRect.width)
+      return false;
     return true;
   }
-  
-  public boolean needVScroll(){
+
+  public boolean needVScroll() {
     updateBody();
     updateContent();
-    if(bodyHeightValue >= contentRect.height) return false;
+    if (bodyHeightValue >= contentRect.height)
+      return false;
     return true;
   }
-  
+
   public void setHorizontalBar() {
     if (isContainContent()) {
       if (!needHScroll()) {
@@ -111,10 +113,9 @@ public class AScrolledComposite extends Composite {
         horizontalBar.draw();
       } else {
         horizontalBar.setVisible(true);
-        if(needVScroll()){
+        if (needVScroll()) {
           horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue - defautBarVale, defautBarVale);
-        }
-        else{
+        } else {
           horizontalBar.setBounds(0, bodyHeightValue - defautBarVale, bodyWidthValue, defautBarVale);
         }
         horizontalBar.draw();
@@ -149,16 +150,14 @@ public class AScrolledComposite extends Composite {
         verticalBar.draw();
       } else {
         verticalBar.setVisible(true);
-        if(needHScroll()){
+        if (needHScroll()) {
           verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue - defautBarVale);
-        }
-        else{
+        } else {
           verticalBar.setBounds(bodyWidthValue - defautBarVale, 0, defautBarVale, bodyHeightValue);
         }
         verticalBar.draw();
       }
-    }
-    else{
+    } else {
       verticalBar.setBounds(0, 0, 0, 0);
       verticalBar.draw();
     }
@@ -171,8 +170,9 @@ public class AScrolledComposite extends Composite {
 
       @Override
       public void paintControl(PaintEvent e) {
-        System.out.println("needing !!!!!!!!!!!"+(needHScroll() && needVScroll()));
-        if(needHScroll() && needVScroll()) e.gc.fillRectangle(0, 0, complement.getBounds().width, complement.getBounds().height);
+        System.out.println("needing !!!!!!!!!!!" + (needHScroll() && needVScroll()));
+        if (needHScroll() && needVScroll())
+          e.gc.fillRectangle(0, 0, complement.getBounds().width, complement.getBounds().height);
       }
     });
   }
@@ -180,37 +180,41 @@ public class AScrolledComposite extends Composite {
   public int getMinHeight() {
     return minHeight;
   }
-  
+
   public int getMinWidth() {
     return minWidth;
   }
-  
+
   protected void updateComplement() {
-    if(needHScroll() && needVScroll()) {
-      complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale, defautBarVale);
-    }
-    else{
+    if (needHScroll() && needVScroll()) {
+      complement.setBounds(bodyWidthValue - defautBarVale, bodyHeightValue - defautBarVale, defautBarVale,
+          defautBarVale);
+    } else {
       complement.setBounds(0, 0, 0, 0);
     }
     complement.redraw();
   }
+
   public void setExpandHorizontal(boolean expand) {
     checkWidget();
-    if (expand == expandHorizontal) return;
+    if (expand == expandHorizontal)
+      return;
     expandHorizontal = expand;
     layout(false);
   }
-  
-  public boolean getExpandHorizontal(){
+
+  public boolean getExpandHorizontal() {
     return expandHorizontal;
   }
-  
-  public boolean getExpandVertical(){
+
+  public boolean getExpandVertical() {
     return expandVertical;
   }
+
   public void setExpandVertical(boolean expand) {
     checkWidget();
-    if (expand == expandVertical) return;
+    if (expand == expandVertical)
+      return;
     expandVertical = expand;
     layout(false);
   }
@@ -235,17 +239,18 @@ public class AScrolledComposite extends Composite {
 
   public void setMinSize(int width, int height) {
     checkWidget();
-    if (width == minWidth && height == minHeight) return;
+    if (width == minWidth && height == minHeight)
+      return;
     minWidth = Math.max(0, width);
     minHeight = Math.max(0, height);
     layout(false);
   }
-  
-  public void setLayout (Layout layout) {
+
+  public void setLayout(Layout layout) {
     checkWidget();
     return;
   }
-  
+
   protected void updateBody() {
     bodyRect = getBounds();
     bodyHeightValue = bodyRect.height - 2 * getBorderWidth();
@@ -264,19 +269,19 @@ public class AScrolledComposite extends Composite {
     return (double) sb.getSelection() / (double) (sb.getMaximum() - sb.getMinimum());
   }
 
-  public boolean setScrollBarAttribute(ScrollBar sb){
+  public boolean setScrollBarAttribute(ScrollBar sb) {
     updateBody();
     updateContent();
     int bodyValue, contentValue;
-    if (sb.getIsVertical()) { 
+    if (sb.getIsVertical()) {
       bodyValue = bodyRect.height - getBorderWidth() * 2;
-      if(needHScroll()) {
-        bodyValue  -= defautBarVale;
+      if (needHScroll()) {
+        bodyValue -= defautBarVale;
       }
       contentValue = contentRect.height;
     } else {
       bodyValue = bodyRect.width - getBorderWidth() * 2;
-      if(needVScroll()) {
+      if (needVScroll()) {
         bodyValue -= defautBarVale;
       }
       contentValue = contentRect.width;
@@ -284,31 +289,29 @@ public class AScrolledComposite extends Composite {
     sb.setMaximum(contentValue);
     sb.setMinimum(0);
     sb.setThumb(Math.min(contentValue, bodyValue));
-    sb.setIncrement (1);
+    sb.setIncrement(1);
     sb.setPageIncrement(bodyValue);
     int Page = contentValue - bodyValue;
     int Selection = sb.getSelection();
-    if(Selection >= Page) {
-      if(Page <= 0) {
+    if (Selection >= Page) {
+      if (Page <= 0) {
         Selection = 0;
         sb.setSelection(0);
       }
-      if(sb.getIsVertical()){
-        contentRect.y = - Selection;
-      }
-      else{
-        contentRect.x = - Selection;
+      if (sb.getIsVertical()) {
+        contentRect.y = -Selection;
+      } else {
+        contentRect.x = -Selection;
       }
     }
     return true;
   }
-  
-  
+
   public void setScrollBar(final ScrollBar sb) {
     setScrollBarAttribute(sb);
   }
 
-  public void updateScrolledComposite(){
+  public void updateScrolledComposite() {
     updateComplement();
     setScrollBarAttribute(horizontalBar);
     setScrollBarAttribute(verticalBar);
@@ -316,22 +319,22 @@ public class AScrolledComposite extends Composite {
     setVerticalBar();
     setHorizontalBar();
   }
-  
+
   public void setContent(Composite c) {
     content = c;
     setScrollBar(verticalBar);
     setScrollBar(horizontalBar);
     layout(false);
     content.addControlListener(new ControlListener() {
-      
+
       @Override
       public void controlResized(ControlEvent e) {
         layout(false);
       }
-      
+
       @Override
       public void controlMoved(ControlEvent e) {
-        
+
       }
     });
   }
@@ -1112,7 +1115,11 @@ public class AScrolledComposite extends Composite {
     public void drawThumb(GC gc) {
       if (thumbImage == null) {
         gc.setForeground(thumbFrameColor);
-        System.out.println("thumbRect:"+thumbRect);
+        System.out.println("thumbRect:" + thumbRect);
+        System.out.println("maximum:"+maximum);
+        System.out.println("minimum:"+minimum);
+        System.out.println("selection:"+selection);
+        System.out.println("pageIncrement:"+pageIncrement);
         if (isVertical) {
           gc.drawRoundRectangle(thumbRect.x, thumbRect.y, thumbRect.width - 1, thumbRect.height - 1, 3, 3);
           gc.setBackground(thumbColor);
@@ -1227,23 +1234,21 @@ public class AScrolledComposite extends Composite {
     }
 
     public void setSelection(int value) {
-      // changable
-
-      if (minimum >=value) {
+      if (minimum >= value) {
         selection = minimum;
         return;
       }
-      if (value > ((maximum - minimum) - pageIncrement)) {
+      if (value >= ((maximum - minimum) - pageIncrement)) {
         selection = ((maximum - minimum) - pageIncrement);
         return;
       }
       selection = value;
     }
 
-    public boolean getIsVisible(){
+    public boolean getIsVisible() {
       return isVisiable;
     }
-    
+
     public void setVisible(boolean visible) {
       isVisiable = visible;
     }
@@ -1334,13 +1339,15 @@ public class AScrolledComposite extends Composite {
       thumbImageData = new ImageData(url);
       thumbImage = new Image(display, thumbImageData);
     }
-    public Point getSize(){
+
+    public Point getSize() {
       return new Point(width, height);
     }
-    public Rectangle getBounds(){
+
+    public Rectangle getBounds() {
       return body.getBounds();
     }
-    
+
     public Shell getShell() {
       return parent.getShell();
     }
@@ -1366,7 +1373,7 @@ public class AScrolledComposite extends Composite {
     }
 
     public int getSelection() {
-      if(selection > ((maximum - minimum) - pageIncrement) || selection < minimum){
+      if (selection > ((maximum - minimum) - pageIncrement) || selection < minimum) {
         setSelection(selection);
       }
       return selection;

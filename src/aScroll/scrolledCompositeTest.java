@@ -38,6 +38,7 @@ public class scrolledCompositeTest{
       
       @Override
       public void paintControl(PaintEvent e) {
+        System.out.println("sc1 origin:"+sc1.getOrigin());
         System.out.println("border s1:"+sc1.getBorderWidth());
         System.out.println("c1 size" + c1.getSize());
         System.out.println("sc1 minheight:"+sc1.getMinHeight()+"minwidth:"+sc1.getMinWidth());
@@ -50,7 +51,7 @@ public class scrolledCompositeTest{
     final AScrolledComposite sc2 = new AScrolledComposite(shell,  SWT.BORDER);
     sc2.setExpandHorizontal(true);
     sc2.setExpandVertical(true);
-    final Composite c2 = new Composite(sc2, SWT.BORDER);
+    final Composite c2 = new Composite(sc2, SWT.NONE);
     sc2.setContent(c2);
     c2.setBackground(blue);
 //    c2.setSize(c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -63,7 +64,7 @@ public class scrolledCompositeTest{
     System.out.println("c2.computeSize result:"+c2.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     System.out.println("border width:"+c2.getBorderWidth());
     System.out.println("c2 defaultBounds:"+c2.getBounds());
-    sc2.setMinSize(200, 200);
+    sc2.setMinSize(300, 300);
 //    sc2.setMinSize(10, 10);
     sc2.addPaintListener(new PaintListener() {
       
@@ -78,6 +79,7 @@ public class scrolledCompositeTest{
       
       @Override
       public void paintControl(PaintEvent e) {
+        System.out.println("sc1 origin:"+sc2.getOrigin());
         System.out.println("c2 size:" + c2.getSize());
         System.out.println("sc2 minheight:"+sc2.getMinHeight()+"minwidth:"+sc2.getMinWidth());
         System.out.println("sc2 size:"+sc2.getSize());
