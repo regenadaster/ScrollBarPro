@@ -264,8 +264,7 @@ public class AScrolledComposite extends Composite {
     return (double) sb.getSelection() / (double) (sb.getMaximum() - sb.getMinimum());
   }
 
-  public void setScrollBarAttribute(ScrollBar sb){
-    int tmpMax;
+  public boolean setScrollBarAttribute(ScrollBar sb){
     updateBody();
     updateContent();
     int bodyValue, contentValue;
@@ -282,14 +281,26 @@ public class AScrolledComposite extends Composite {
       }
       contentValue = contentRect.width;
     }
-    tmpMax = bodyValue - 2 * defautBarVale;
-    sb.setMaximum(tmpMax);
+    sb.setMaximum(contentValue);
     sb.setMinimum(0);
-    double scales = (double) (sb.getMaximum() - sb.getMinimum());
-    double percent = (double) bodyValue / (double) contentValue;
-    int tmpThumb = (int) (scales * percent);
-    sb.setThumb(tmpThumb);
-    sb.setPageIncrement(tmpThumb);
+    sb.setThumb(Math.min(contentValue, bodyValue));
+    sb.setIncrement (1);
+    sb.setPageIncrement(bodyValue);
+    int Page = contentValue - bodyValue;
+    int Selection = sb.getSelection();
+    if(Selection >= Page) {
+      if(Page <= 0) {
+        Selection = 0;
+        sb.setSelection(0);
+      }
+      if(sb.getIsVertical()){
+        contentRect.y = - Selection;
+      }
+      else{
+        contentRect.x = - Selection;
+      }
+    }
+    return true;
   }
   
   
@@ -301,7 +312,7 @@ public class AScrolledComposite extends Composite {
     updateComplement();
     setScrollBarAttribute(horizontalBar);
     setScrollBarAttribute(verticalBar);
-    setContentData();
+    content.setBounds(contentRect);
     setVerticalBar();
     setHorizontalBar();
   }
@@ -1218,7 +1229,7 @@ public class AScrolledComposite extends Composite {
     public void setSelection(int value) {
       // changable
 
-      if (minimum > value) {
+      if (minimum >=value) {
         selection = minimum;
         return;
       }
@@ -1355,6 +1366,9 @@ public class AScrolledComposite extends Composite {
     }
 
     public int getSelection() {
+      if(selection > ((maximum - minimum) - pageIncrement) || selection < minimum){
+        setSelection(selection);
+      }
       return selection;
     }
 
